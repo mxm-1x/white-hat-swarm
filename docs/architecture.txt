@@ -1,0 +1,37 @@
++==========================================================================+
+|                                                                          |
+|        W H I T E - H A T   :   AUTONOMOUS  REMEDIATION  SWARM             |
+|                                                                          |
+|     Track 3  -  Regulated & High-Stakes Workflows  -  built on Band.ai    |
+|                                                                          |
++==========================================================================+
+
+         [ CI / CD pipeline  or  Human ]
+                       |
+                       |   "@Hacker  possible SQL injection in acme-billing"
+                       v
+  .--------------------------------  BAND ROOM  ----------------------------.
+  |                                                                         |
+  |  .----------.     .----------.     .----------.     .------------.      |
+  |  |  HACKER  | --> | ENGINEER | --> | QA TESTER| --> | COMPLIANCE |      |
+  |  |  CrewAI  |     | LangGraph|     | LangGraph|     |   CrewAI   |      |
+  |  |~~~~~~~~~~|     |~~~~~~~~~~|     |~~~~~~~~~~|     |~~~~~~~~~~~~|      |
+  |  | find the |     | write  & |     | run real |     |  SOC2 /    |      |
+  |  | exploit  |     | apply    |     | pytest   |     |  OWASP     |      |
+  |  | CWE-89   |     | patch    |     | 1F -> 3P |     |  verdict   |      |
+  |  '----------'     '----------'     '----------'     '------------'      |
+  |       ^                                 |                               |
+  |       '-------------- fail loop --------'                               |
+  |                                                                         |
+  '------------------------------------+------------------------------------'
+                                       |
+                  verdict  +  [ SHA-256 sealed audit manifest ]
+                                       v
+                          .----------------------------.
+                          |    HUMAN  APPROVAL  GATE    |
+                          |     [  Approve & Deploy  ]  |
+                          '----------------------------'
+
+      detect  ->  patch  ->  verify  ->  comply  ->  human-approve
+   4 agents | 2 frameworks (CrewAI + LangGraph) | no custom infra: Band is
+            the collaboration bus, dashboard, and approval gate.

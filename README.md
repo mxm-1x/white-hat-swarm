@@ -8,6 +8,35 @@ A static "Remediation Command Center" that replays the swarm's run — the four 
 Band hand-off chain, the 🔴→🟢 test flip, the SOC2/OWASP verdict, and the SHA-256-sealed
 manifest with a working human-approval gate.
 
+```
+         [ CI / CD pipeline  or  Human ]
+                       |
+                       |   "@Hacker  possible SQL injection in acme-billing"
+                       v
+  .--------------------------------  BAND ROOM  ----------------------------.
+  |  .----------.     .----------.     .----------.     .------------.      |
+  |  |  HACKER  | --> | ENGINEER | --> | QA TESTER| --> | COMPLIANCE |      |
+  |  |  CrewAI  |     | LangGraph|     | LangGraph|     |   CrewAI   |      |
+  |  |~~~~~~~~~~|     |~~~~~~~~~~|     |~~~~~~~~~~|     |~~~~~~~~~~~~|      |
+  |  | find the |     | write  & |     | run real |     |  SOC2 /    |      |
+  |  | exploit  |     | apply    |     | pytest   |     |  OWASP     |      |
+  |  | CWE-89   |     | patch    |     | 1F -> 3P |     |  verdict   |      |
+  |  '----------'     '----------'     '----------'     '------------'      |
+  |       ^                                 |                               |
+  |       '-------------- fail loop --------'                               |
+  '------------------------------------+------------------------------------'
+                                       |
+                  verdict  +  [ SHA-256 sealed audit manifest ]
+                                       v
+                          .----------------------------.
+                          |    HUMAN  APPROVAL  GATE    |
+                          |     [  Approve & Deploy  ]  |
+                          '----------------------------'
+
+      detect -> patch -> verify -> comply -> human-approve
+   4 agents | 2 frameworks (CrewAI + LangGraph) | no custom infra
+```
+
 Four AI agents — built in **two different frameworks** — collaborate inside a
 single Band room to take a security vulnerability from **detection → verified
 patch → compliance sign-off**, then hand a **tamper-evident audit manifest** to a
