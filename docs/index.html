@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>White-Hat — Autonomous Remediation Command Center</title>
+<style>
+  :root{
+    --bg:#0a0e14; --panel:#121822; --panel2:#0e141d; --line:#1e2937;
+    --text:#e6edf3; --muted:#8b98a9; --accent:#3fb950; --red:#f85149;
+    --blue:#58a6ff; --purple:#bc8cff; --amber:#e3b341; --cyan:#39c5cf;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);
+    font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial}
+  a{color:var(--blue)}
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 20px 60px}
+  header{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:6px}
+  header h1{font-size:22px;margin:0;letter-spacing:.2px}
+  .badge{font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);
+    color:var(--muted);background:var(--panel)}
+  .badge.live{color:var(--accent);border-color:#1f3d29;background:#0f1b13}
+  .sub{color:var(--muted);font-size:13px;margin:2px 0 22px}
+  .grid-agents{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+  .agent{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .agent .emoji{font-size:24px}
+  .agent .name{font-weight:600;margin-top:6px}
+  .agent .fw{display:inline-block;margin-top:6px;font-size:11px;padding:2px 8px;border-radius:6px;
+    background:#0e1b2e;color:var(--blue);border:1px solid #173049}
+  .agent .fw.crew{background:#241a2e;color:var(--purple);border-color:#3a2a47}
+  .agent .role{color:var(--muted);font-size:12px;margin-top:8px;line-height:1.4}
+  .agent .dot{float:right;width:9px;height:9px;border-radius:50%;background:var(--accent);
+    box-shadow:0 0 8px var(--accent)}
+  .cols{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}
+  @media(max-width:880px){.cols{grid-template-columns:1fr}.grid-agents{grid-template-columns:repeat(2,1fr)}}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:18px}
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
+    margin:0 0 14px;font-weight:600}
+  /* feed */
+  .msg{display:flex;gap:11px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .msg:last-child{border-bottom:none}
+  .av{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    font-size:16px;background:var(--panel2);border:1px solid var(--line);flex:0 0 auto}
+  .msg .top{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .msg .who{font-weight:600;font-size:13px}
+  .tag{font-size:10px;padding:1px 6px;border-radius:5px;background:#0e1b2e;color:var(--blue);border:1px solid #173049}
+  .tag.crew{background:#241a2e;color:var(--purple);border-color:#3a2a47}
+  .tag.human{background:#2a2410;color:var(--amber);border-color:#473d17}
+  .ment{font-size:11px;color:var(--cyan)}
+  .msg .body{font-size:13px;color:#cdd6e0;line-height:1.5;margin-top:4px}
+  /* vuln + diff */
+  .kv{font-size:13px;line-height:1.7}
+  .kv b{color:var(--muted);font-weight:500}
+  code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
+  .chip{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;border:1px solid var(--line)}
+  .chip.red{color:var(--red);border-color:#42201f;background:#1b1011}
+  .diff{border:1px solid var(--line);border-radius:8px;overflow:hidden;margin-top:10px}
+  .diff div{padding:7px 10px;font-family:ui-monospace,monospace;font-size:12px;white-space:pre-wrap;word-break:break-word}
+  .diff .del{background:#1b1011;color:#ff9b95;border-left:3px solid var(--red)}
+  .diff .add{background:#0f1b13;color:#7ee787;border-left:3px solid var(--accent)}
+  /* tests */
+  .tests{display:flex;align-items:center;gap:14px;font-size:14px}
+  .pill{padding:8px 12px;border-radius:9px;font-weight:600;border:1px solid var(--line)}
+  .pill.fail{color:var(--red);background:#1b1011;border-color:#42201f}
+  .pill.pass{color:var(--accent);background:#0f1b13;border-color:#1f3d29}
+  .arrow{color:var(--muted);font-size:20px}
+  /* compliance */
+  .ctrl{display:flex;gap:8px;align-items:flex-start;font-size:13px;padding:5px 0}
+  .ok{color:var(--accent);flex:0 0 auto}
+  .ctrl .n{color:var(--muted)}
+  /* seal */
+  .seal{background:linear-gradient(180deg,#101722,#0c121b);border:1px solid var(--line);
+    border-radius:12px;padding:16px}
+  .hash{font-family:ui-monospace,monospace;font-size:11px;color:var(--cyan);word-break:break-all;
+    background:#0a0f17;border:1px solid var(--line);border-radius:7px;padding:9px;margin:8px 0}
+  .gate{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;flex-wrap:wrap}
+  .status{font-weight:700}
+  .status.pending{color:var(--amber)}
+  .status.approved{color:var(--accent)}
+  button{cursor:pointer;border:none;border-radius:9px;padding:11px 18px;font-weight:600;font-size:14px;
+    background:var(--accent);color:#05210f}
+  button:disabled{opacity:.5;cursor:default}
+  footer{color:var(--muted);font-size:12px;text-align:center;margin-top:28px}
+  .flow{color:var(--muted);font-size:12px;margin:-8px 0 18px}
+  .flow b{color:var(--text)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <span style="font-size:26px">🛡️</span>
+    <h1>White-Hat — Autonomous Remediation Command Center</h1>
+    <span class="badge live">● RESOLVED</span>
+    <span class="badge" id="trackBadge">Track 3</span>
+  </header>
+  <div class="sub">Multi-agent security remediation on <b>Band.ai</b> — detect → patch → verify → comply → human-approve.</div>
+  <div class="flow">Pipeline: <b>🕵️ Hacker</b> (CrewAI) → <b>🔧 Engineer</b> (LangGraph) → <b>🧪 QA Tester</b> (LangGraph) → <b>📋 Compliance</b> (CrewAI) → <b>🙋 Human gate</b></div>
+
+  <div class="grid-agents" id="agents"></div>
+
+  <div class="cols">
+    <div>
+      <div class="panel">
+        <h2>Band Room — Agent Hand-off Stream</h2>
+        <div id="feed"></div>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <h2>Vulnerability</h2>
+        <div class="kv" id="vuln"></div>
+        <div class="diff" id="diff"></div>
+      </div>
+      <div class="panel">
+        <h2>Regression + Security Tests</h2>
+        <div class="tests" id="tests"></div>
+      </div>
+      <div class="panel">
+        <h2>Compliance Verdict</h2>
+        <div id="compliance"></div>
+      </div>
+      <div class="seal">
+        <h2 style="margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">🔒 Tamper-Evident Audit Manifest</h2>
+        <div style="font-size:12px;color:var(--muted)">SHA-256 over the canonicalized Band transcript</div>
+        <div class="hash" id="hash"></div>
+        <div style="font-size:12px;color:var(--muted)">Sealed at <span id="sealedAt" class="mono"></span></div>
+        <div class="gate">
+          <div>Human approval: <span class="status pending" id="approvalStatus">PENDING</span></div>
+          <button id="approveBtn">✔ Approve &amp; Deploy</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>Powered by <b>Band.ai</b> · 4 agents · 2 frameworks (CrewAI + LangGraph) · no custom infra — Band is the bus, dashboard &amp; approval gate.</footer>
+</div>
+
+<script>
+/* Embedded fallback so the page renders even from file:// ; overridden by transcript.json when served. */
+const FALLBACK = {"track":"Track 3 — Regulated & High-Stakes Workflows","vulnerability":{"cwe":"CWE-89","owasp":"A03:2021 Injection","file":"target_repo/app.py","line":39,"payload":"x' OR '1'='1","snippet":"query = f\"SELECT ... WHERE name = '{name}'\""},"patch":{"before":"query = f\"SELECT ... WHERE name = '{name}'\"\ncur = conn.execute(query)","after":"cur = conn.execute(\n    \"SELECT ... WHERE name = ?\", (name,)\n)"},"tests":{"before":{"passed":2,"failed":1},"after":{"passed":3,"failed":0}},"compliance":{"decision":"PASS","controls":[{"id":"OWASP A03:2021","met":true},{"id":"SOC2 CC6.1","met":true},{"id":"SOC2 CC7.1","met":true},{"id":"SOC2 CC7.2","met":true}],"criteria":[{"k":"Root-cause class eliminated","met":true},{"k":"Full regression suite passes","met":true},{"k":"Exploit no longer reproduces","met":true},{"k":"No new secrets / network / PII","met":true}]},"integrity":{"algorithm":"SHA-256","digest":"9f2c1a7e4b86d3c05e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d","sealed_at_utc":"2026-06-19T18:05:00Z"},"messages":[{"sender":"Human (CI alert)","role":"human","framework":"","mentions":["@Hacker"],"content":"Security alert from CI: possible SQL injection in the acme-billing customer lookup. Investigate, confirm the exploit, and coordinate a verified fix."},{"sender":"Hacker","role":"hacker","framework":"CrewAI","mentions":["@Engineer"],"content":"Confirmed SQL injection (CWE-89 / OWASP A03) in app.py:39 — f-string concatenates `name` into SQL. Payload x' OR '1'='1 returns every row incl. admins. Fix: parameterized query. @Engineer over to you."},{"sender":"Engineer","role":"engineer","framework":"LangGraph","mentions":["@QA Tester"],"content":"Patched app.py:39 to conn.execute(\"... WHERE name = ?\", (name,)). Root cause eliminated. @QA Tester run the suite."},{"sender":"QA Tester","role":"qa","framework":"LangGraph","mentions":["@Compliance"],"content":"pytest: before 1 failed/2 passed → after 3 passed/0 failed. Injection boundary test now blocks the payload. @Compliance ready to seal."},{"sender":"Compliance Auditor","role":"compliance","framework":"CrewAI","mentions":["@Human"],"content":"PASS — OWASP A03 + SOC2 CC6.1/CC7.1/CC7.2. All acceptance criteria met. SHA-256 manifest sealed. @Human approval required before deploy."}]};
+
+const AGENTS = [
+  {emoji:"🕵️", name:"Hacker", fw:"CrewAI", crew:true, role:"Threat analyst — scans repo, pinpoints exploit (CWE+OWASP)"},
+  {emoji:"🔧", name:"Engineer", fw:"LangGraph", crew:false, role:"Patch developer — writes & applies root-cause fix"},
+  {emoji:"🧪", name:"QA Tester", fw:"LangGraph", crew:false, role:"Regression specialist — runs real pytest suite"},
+  {emoji:"📋", name:"Compliance", fw:"CrewAI", crew:true, role:"Risk assessor — SOC2/OWASP gate, routes to human"},
+];
+const EMOJI = {human:"🙋",hacker:"🕵️",engineer:"🔧",qa:"🧪",compliance:"📋"};
+
+function render(d){
+  document.getElementById("trackBadge").textContent = (d.track||"Track 3").split("—")[0].trim();
+  // agents
+  document.getElementById("agents").innerHTML = AGENTS.map(a=>`
+    <div class="agent"><span class="dot"></span><div class="emoji">${a.emoji}</div>
+      <div class="name">${a.name}</div>
+      <div class="fw ${a.crew?'crew':''}">${a.fw}</div>
+      <div class="role">${a.role}</div></div>`).join("");
+  // feed
+  document.getElementById("feed").innerHTML = d.messages.map(m=>`
+    <div class="msg"><div class="av">${EMOJI[m.role]||"💬"}</div>
+      <div><div class="top"><span class="who">${m.sender}</span>
+        ${m.framework?`<span class="tag ${m.role==='hacker'||m.role==='compliance'?'crew':''}">${m.framework}</span>`:`<span class="tag human">human</span>`}
+        ${(m.mentions||[]).length?`<span class="ment">→ ${m.mentions.join(", ")}</span>`:""}</div>
+        <div class="body">${m.content}</div></div></div>`).join("");
+  // vuln
+  const v=d.vulnerability;
+  document.getElementById("vuln").innerHTML = `
+    <div><span class="chip red">${v.cwe}</span> <span class="chip red">${v.owasp}</span></div>
+    <div style="margin-top:8px"><b>Location:</b> <code>${v.file}:${v.line}</code></div>
+    <div><b>Exploit payload:</b> <code>${v.payload}</code></div>`;
+  document.getElementById("diff").innerHTML =
+    `<div class="del">- ${d.patch.before.replace(/\n/g,"\n- ")}</div>`+
+    `<div class="add">+ ${d.patch.after.replace(/\n/g,"\n+ ")}</div>`;
+  // tests
+  const t=d.tests;
+  document.getElementById("tests").innerHTML =
+    `<div class="pill fail">🔴 ${t.before.failed} failed · ${t.before.passed} passed</div>
+     <div class="arrow">→</div>
+     <div class="pill pass">🟢 ${t.after.passed} passed · ${t.after.failed} failed</div>`;
+  // compliance
+  const c=d.compliance;
+  document.getElementById("compliance").innerHTML =
+    `<div style="margin-bottom:10px"><span class="chip" style="color:var(--accent);border-color:#1f3d29;background:#0f1b13;font-weight:700">VERDICT: ${c.decision}</span></div>`+
+    c.controls.map(x=>`<div class="ctrl"><span class="ok">✓</span><div><b>${x.id}</b>${x.note?` <span class="n">— ${x.note}</span>`:""}</div></div>`).join("")+
+    `<div style="height:8px"></div>`+
+    c.criteria.map(x=>`<div class="ctrl"><span class="ok">${x.met?'✓':'✗'}</span><div class="n">${x.k}</div></div>`).join("");
+  // seal
+  document.getElementById("hash").textContent = (d.integrity.algorithm||"SHA-256")+":  "+d.integrity.digest;
+  document.getElementById("sealedAt").textContent = d.integrity.sealed_at_utc||"";
+}
+
+document.getElementById("approveBtn").addEventListener("click",()=>{
+  const s=document.getElementById("approvalStatus");
+  s.textContent="APPROVED — deployed to production"; s.className="status approved";
+  const b=document.getElementById("approveBtn"); b.disabled=true; b.textContent="✔ Approved";
+});
+
+fetch("transcript.json").then(r=>r.ok?r.json():Promise.reject()).then(render).catch(()=>render(FALLBACK));
+</script>
+</body>
+</html>

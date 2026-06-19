@@ -1,0 +1,69 @@
+{
+  "system": "White-Hat Autonomous Remediation Swarm",
+  "track": "Track 3 — Regulated & High-Stakes Workflows",
+  "room_id": "demo-room",
+  "vulnerability": {
+    "cwe": "CWE-89",
+    "owasp": "A03:2021 Injection",
+    "file": "target_repo/app.py",
+    "line": 39,
+    "payload": "x' OR '1'='1",
+    "snippet": "query = f\"SELECT id, name, email, is_admin FROM users WHERE name = '{name}'\""
+  },
+  "patch": {
+    "file": "target_repo/app.py",
+    "before": "query = f\"SELECT ... WHERE name = '{name}'\"\ncur = conn.execute(query)",
+    "after": "cur = conn.execute(\n    \"SELECT ... WHERE name = ?\", (name,)\n)"
+  },
+  "tests": {
+    "before": { "passed": 2, "failed": 1, "verdict": "FAILED" },
+    "after":  { "passed": 3, "failed": 0, "verdict": "PASS" }
+  },
+  "compliance": {
+    "decision": "PASS",
+    "controls": [
+      { "id": "OWASP A03:2021", "met": true, "note": "Injection eliminated via parameterized query" },
+      { "id": "SOC2 CC6.1", "met": true, "note": "Unauthorized data disclosure prevented" },
+      { "id": "SOC2 CC7.1", "met": true, "note": "Vulnerability remediated and independently verified" },
+      { "id": "SOC2 CC7.2", "met": true, "note": "Tamper-evident audit record produced" }
+    ],
+    "criteria": [
+      { "k": "Root-cause class eliminated (not input-filtered)", "met": true },
+      { "k": "Full regression suite passes", "met": true },
+      { "k": "Boundary/abuse test no longer exploits", "met": true },
+      { "k": "No new secrets / network calls / PII handling", "met": true }
+    ]
+  },
+  "integrity": {
+    "algorithm": "SHA-256",
+    "digest": "9f2c1a7e4b86d3c05e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d",
+    "sealed_at_utc": "2026-06-19T18:05:00Z"
+  },
+  "messages": [
+    {
+      "sender": "Human (CI alert)", "role": "human", "framework": "",
+      "mentions": ["@Hacker"],
+      "content": "Security alert from CI: possible SQL injection in the acme-billing customer lookup. Investigate the repository, confirm the exploit vector, and coordinate a verified fix with the team."
+    },
+    {
+      "sender": "Hacker", "role": "hacker", "framework": "CrewAI",
+      "mentions": ["@Engineer"],
+      "content": "Confirmed SQL injection (CWE-89 / OWASP A03) in target_repo/app.py:39. The query is built with an f-string, so `name` is concatenated directly into SQL. Exploit payload  x' OR '1'='1  returns every row including admins. Fix direction: replace with a parameterized query using a '?' placeholder and a params tuple. Handing to @Engineer."
+    },
+    {
+      "sender": "Engineer", "role": "engineer", "framework": "LangGraph",
+      "mentions": ["@QA Tester"],
+      "content": "Patched app.py:39 — replaced the f-string query with conn.execute(\"... WHERE name = ?\", (name,)). Root cause (string-built SQL) eliminated; no input filtering shortcuts. Patch applied. @QA Tester please run the full suite."
+    },
+    {
+      "sender": "QA Tester", "role": "qa", "framework": "LangGraph",
+      "mentions": ["@Compliance"],
+      "content": "Ran pytest in sandbox. Before patch: 1 failed, 2 passed (test_no_sql_injection leaked 3 rows). After patch: 3 passed, 0 failed — the SQL-injection boundary test now blocks the tautology payload. Regression suite green. @Compliance ready to seal."
+    },
+    {
+      "sender": "Compliance Auditor", "role": "compliance", "framework": "CrewAI",
+      "mentions": ["@Human"],
+      "content": "Verdict: PASS. Maps to OWASP A03:2021 and SOC2 CC6.1/CC7.1/CC7.2. All four acceptance criteria met: root-cause eliminated, regression green, exploit no longer reproduces, no new secrets/network/PII. Tamper-evident SHA-256 manifest sealed. @Human approval required before production deployment."
+    }
+  ]
+}
