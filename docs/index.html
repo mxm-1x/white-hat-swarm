@@ -143,7 +143,7 @@ const AGENTS=[
   {key:"compliance",emoji:"📋",name:"Compliance",fw:"CrewAI",crew:true,role:"Risk assessor — SOC2/OWASP gate to human"},
 ];
 const EMOJI={human:"🙋",hacker:"🕵️",engineer:"🔧",qa:"🧪",compliance:"📋"};
-let MODE="replay", POLL=null;
+let MODE="replay", POLL=null, DATA=null;
 
 function agentCards(rolesPosted, phase){
   document.getElementById("agents").innerHTML=AGENTS.map(a=>{
@@ -157,8 +157,8 @@ function agentCards(rolesPosted, phase){
 
 function render(d){
   document.getElementById("trackBadge").textContent=(d.track||"Track 3").split("—")[0].trim();
-  if(d.phase) document.getElementById("phase").innerHTML =
-    (MODE==="live" && !d.approved && d.phase!=="idle" ? '<span class="spinner"></span>' : '') + d.phase;
+  if(d.phase){ const sp = !d.approved && /…/.test(d.phase);
+    document.getElementById("phase").innerHTML = (sp?'<span class="spinner"></span>':'') + d.phase; }
   const msgs=d.messages||[];
   const rolesPosted=new Set(msgs.map(m=>m.role).filter(r=>["hacker","engineer","qa","compliance"].includes(r)));
   agentCards(rolesPosted, d.phase||"");
@@ -212,8 +212,36 @@ async function refresh(){
   }catch(e){}
 }
 
+// ---- interactive replay (no backend): animate the recorded run step-by-step ----
+function stateAt(i){
+  if(!DATA) return {messages:[]};
+  const phases=["🕵️ Hacker analyzing the repository…","🔧 Engineer drafting the patch…",
+    "🧪 QA Tester running the suite…","📋 Compliance reviewing the patch…","🙋 Awaiting human approval"];
+  return {
+    track:DATA.track,
+    phase: i<0 ? "Ready — click Launch to run the remediation demo." : phases[Math.min(i,4)],
+    approved:false,
+    vulnerability: i>=1 ? DATA.vulnerability : {},
+    patch: i>=2 ? DATA.patch : {},
+    tests: DATA.tests,
+    patched: i>=3,
+    compliance: { decision: i>=4?"PASS":"PENDING", controls:DATA.compliance.controls,
+                  criteria:DATA.compliance.criteria, done: i>=4 },
+    integrity: i>=4 ? DATA.integrity : null,
+    messages: i<0 ? [] : DATA.messages.slice(0,i+1),
+  };
+}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+async function animateReplay(){
+  const n=(DATA.messages||[]).length;
+  for(let i=0;i<n;i++){ render(stateAt(i)); await sleep(i===0?1000:1900); }
+  render(stateAt(n-1));   // final: awaiting human approval, approve enabled
+}
+
 document.getElementById("launchBtn").addEventListener("click", async ()=>{
-  const b=document.getElementById("launchBtn"); b.disabled=true; b.textContent="🚀 Launching…";
+  const b=document.getElementById("launchBtn");
+  if(MODE!=="live"){ b.style.display="none"; animateReplay(); return; }
+  b.disabled=true; b.textContent="🚀 Launching…";
   try{ await fetch("api/run",{method:"POST"});
     document.getElementById("phase").innerHTML='<span class="spinner"></span>🕵️ Hacker analyzing the repository…';
     if(POLL) clearInterval(POLL); POLL=setInterval(refresh, 2500); refresh();
@@ -237,9 +265,10 @@ document.getElementById("approveBtn").addEventListener("click", async ()=>{
     document.getElementById("phase").textContent="Ready — click Launch to start a remediation run.";
     if(hh.room_id){ room.style.display="inline-block"; room.textContent="room "+hh.room_id.slice(0,8); document.getElementById("launchBtn").style.display="none"; POLL=setInterval(refresh,2500); refresh(); }
   }catch(e){
-    MODE="replay"; document.getElementById("modeBadge").textContent="● REPLAY"; document.getElementById("modeBadge").className="badge replay";
-    document.getElementById("phase").textContent="Recorded run (static)";
-    try{ const r=await fetch("transcript.json"); render(await r.json()); }catch(_){}
+    MODE="replay"; document.getElementById("modeBadge").textContent="● INTERACTIVE DEMO"; document.getElementById("modeBadge").className="badge replay";
+    document.getElementById("launchBtn").style.display="inline-block";
+    try{ const r=await fetch("transcript.json"); DATA=await r.json(); }catch(_){}
+    render(stateAt(-1));
   }
 })();
 </script>
