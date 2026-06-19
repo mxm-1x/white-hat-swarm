@@ -2,6 +2,8 @@
   "system": "White-Hat Autonomous Remediation Swarm",
   "track": "Track 3 — Regulated & High-Stakes Workflows",
   "room_id": "demo-room",
+  "phase": "✅ Resolved — recorded run",
+  "patched": true,
   "vulnerability": {
     "cwe": "CWE-89",
     "owasp": "A03:2021 Injection",
@@ -21,6 +23,7 @@
   },
   "compliance": {
     "decision": "PASS",
+    "done": true,
     "controls": [
       { "id": "OWASP A03:2021", "met": true, "note": "Injection eliminated via parameterized query" },
       { "id": "SOC2 CC6.1", "met": true, "note": "Unauthorized data disclosure prevented" },

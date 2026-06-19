@@ -46,7 +46,9 @@ remediation swarm. When the Engineer @mentions you that a patch is ready:
    seal the audit, with mentions ["@malharmahanor/compliance-agent"].
 3. If TESTS FAILED: send ONE message with the failing output so they can fix it,
    with mentions ["@malharmahanor/engineer"]. Do not attempt to fix code yourself.
-Report results factually — never claim a pass you did not see in the tool output."""
+Report results factually — never claim a pass you did not see in the tool output.
+IMPORTANT: Only act when the Engineer hands you a patch to test. For any other
+message — approvals, verdicts, acknowledgements — take NO action and stay silent."""
 
 
 async def main():

@@ -20,23 +20,40 @@
   .badge{font-size:11px;padding:3px 9px;border-radius:999px;border:1px solid var(--line);
     color:var(--muted);background:var(--panel)}
   .badge.live{color:var(--accent);border-color:#1f3d29;background:#0f1b13}
-  .sub{color:var(--muted);font-size:13px;margin:2px 0 22px}
+  .badge.replay{color:var(--amber);border-color:#473d17;background:#1b1610}
+  .sub{color:var(--muted);font-size:13px;margin:2px 0 16px}
+  /* control bar */
+  .control{display:flex;align-items:center;gap:14px;flex-wrap:wrap;background:var(--panel);
+    border:1px solid var(--line);border-radius:12px;padding:14px 16px;margin-bottom:18px}
+  .phase{font-weight:600;font-size:14px}
+  .spinner{width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--blue);
+    border-radius:50%;display:inline-block;animation:spin 1s linear infinite;vertical-align:-2px;margin-right:6px}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .grow{flex:1}
+  button{cursor:pointer;border:none;border-radius:9px;padding:10px 18px;font-weight:600;font-size:14px;
+    background:var(--blue);color:#04122b}
+  button.approve{background:var(--accent);color:#05210f}
+  button:disabled{opacity:.45;cursor:default}
+  .flow{color:var(--muted);font-size:12px;margin:-6px 0 18px}
+  .flow b{color:var(--text)}
   .grid-agents{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
-  .agent{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px}
+  .agent{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;opacity:.5;transition:.3s}
+  .agent.active{opacity:1;border-color:#2b3a4d}
+  .agent.done{opacity:1}
   .agent .emoji{font-size:24px}
   .agent .name{font-weight:600;margin-top:6px}
   .agent .fw{display:inline-block;margin-top:6px;font-size:11px;padding:2px 8px;border-radius:6px;
     background:#0e1b2e;color:var(--blue);border:1px solid #173049}
   .agent .fw.crew{background:#241a2e;color:var(--purple);border-color:#3a2a47}
   .agent .role{color:var(--muted);font-size:12px;margin-top:8px;line-height:1.4}
-  .agent .dot{float:right;width:9px;height:9px;border-radius:50%;background:var(--accent);
-    box-shadow:0 0 8px var(--accent)}
+  .agent .dot{float:right;width:9px;height:9px;border-radius:50%;background:#30363d}
+  .agent.done .dot{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+  .agent.active .dot{background:var(--amber);box-shadow:0 0 8px var(--amber)}
   .cols{display:grid;grid-template-columns:1.15fr .85fr;gap:18px}
   @media(max-width:880px){.cols{grid-template-columns:1fr}.grid-agents{grid-template-columns:repeat(2,1fr)}}
   .panel{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:18px}
-  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);
-    margin:0 0 14px;font-weight:600}
-  /* feed */
+  .panel h2{font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin:0 0 14px;font-weight:600}
+  .empty{color:var(--muted);font-size:13px;padding:18px 0;text-align:center}
   .msg{display:flex;gap:11px;padding:12px 0;border-bottom:1px solid var(--line)}
   .msg:last-child{border-bottom:none}
   .av{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;
@@ -47,10 +64,8 @@
   .tag.crew{background:#241a2e;color:var(--purple);border-color:#3a2a47}
   .tag.human{background:#2a2410;color:var(--amber);border-color:#473d17}
   .ment{font-size:11px;color:var(--cyan)}
-  .msg .body{font-size:13px;color:#cdd6e0;line-height:1.5;margin-top:4px}
-  /* vuln + diff */
-  .kv{font-size:13px;line-height:1.7}
-  .kv b{color:var(--muted);font-weight:500}
+  .msg .body{font-size:13px;color:#cdd6e0;line-height:1.5;margin-top:4px;white-space:pre-wrap}
+  .kv{font-size:13px;line-height:1.7}.kv b{color:var(--muted);font-weight:500}
   code,.mono{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:12px}
   .chip{display:inline-block;padding:2px 8px;border-radius:6px;font-size:11px;border:1px solid var(--line)}
   .chip.red{color:var(--red);border-color:#42201f;background:#1b1011}
@@ -58,31 +73,20 @@
   .diff div{padding:7px 10px;font-family:ui-monospace,monospace;font-size:12px;white-space:pre-wrap;word-break:break-word}
   .diff .del{background:#1b1011;color:#ff9b95;border-left:3px solid var(--red)}
   .diff .add{background:#0f1b13;color:#7ee787;border-left:3px solid var(--accent)}
-  /* tests */
-  .tests{display:flex;align-items:center;gap:14px;font-size:14px}
+  .tests{display:flex;align-items:center;gap:14px;font-size:14px;flex-wrap:wrap}
   .pill{padding:8px 12px;border-radius:9px;font-weight:600;border:1px solid var(--line)}
   .pill.fail{color:var(--red);background:#1b1011;border-color:#42201f}
   .pill.pass{color:var(--accent);background:#0f1b13;border-color:#1f3d29}
+  .pill.idle{color:var(--muted)}
   .arrow{color:var(--muted);font-size:20px}
-  /* compliance */
   .ctrl{display:flex;gap:8px;align-items:flex-start;font-size:13px;padding:5px 0}
-  .ok{color:var(--accent);flex:0 0 auto}
-  .ctrl .n{color:var(--muted)}
-  /* seal */
-  .seal{background:linear-gradient(180deg,#101722,#0c121b);border:1px solid var(--line);
-    border-radius:12px;padding:16px}
+  .ok{color:var(--accent);flex:0 0 auto}.ctrl .n{color:var(--muted)}
+  .seal{background:linear-gradient(180deg,#101722,#0c121b);border:1px solid var(--line);border-radius:12px;padding:16px}
   .hash{font-family:ui-monospace,monospace;font-size:11px;color:var(--cyan);word-break:break-all;
     background:#0a0f17;border:1px solid var(--line);border-radius:7px;padding:9px;margin:8px 0}
   .gate{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;flex-wrap:wrap}
-  .status{font-weight:700}
-  .status.pending{color:var(--amber)}
-  .status.approved{color:var(--accent)}
-  button{cursor:pointer;border:none;border-radius:9px;padding:11px 18px;font-weight:600;font-size:14px;
-    background:var(--accent);color:#05210f}
-  button:disabled{opacity:.5;cursor:default}
+  .status{font-weight:700}.status.pending{color:var(--amber)}.status.approved{color:var(--accent)}
   footer{color:var(--muted);font-size:12px;text-align:center;margin-top:28px}
-  .flow{color:var(--muted);font-size:12px;margin:-8px 0 18px}
-  .flow b{color:var(--text)}
 </style>
 </head>
 <body>
@@ -90,112 +94,154 @@
   <header>
     <span style="font-size:26px">🛡️</span>
     <h1>White-Hat — Autonomous Remediation Command Center</h1>
-    <span class="badge live">● RESOLVED</span>
+    <span class="badge" id="modeBadge">…</span>
     <span class="badge" id="trackBadge">Track 3</span>
   </header>
   <div class="sub">Multi-agent security remediation on <b>Band.ai</b> — detect → patch → verify → comply → human-approve.</div>
   <div class="flow">Pipeline: <b>🕵️ Hacker</b> (CrewAI) → <b>🔧 Engineer</b> (LangGraph) → <b>🧪 QA Tester</b> (LangGraph) → <b>📋 Compliance</b> (CrewAI) → <b>🙋 Human gate</b></div>
+
+  <div class="control">
+    <span id="phase" class="phase">Loading…</span>
+    <span class="grow"></span>
+    <span id="roomId" class="badge" style="display:none"></span>
+    <button id="launchBtn" style="display:none">🚀 Launch Remediation Swarm</button>
+  </div>
 
   <div class="grid-agents" id="agents"></div>
 
   <div class="cols">
     <div>
       <div class="panel">
-        <h2>Band Room — Agent Hand-off Stream</h2>
-        <div id="feed"></div>
+        <h2>Band Room — Live Agent Hand-off Stream</h2>
+        <div id="feed"><div class="empty">No activity yet.</div></div>
       </div>
     </div>
     <div>
-      <div class="panel">
-        <h2>Vulnerability</h2>
-        <div class="kv" id="vuln"></div>
-        <div class="diff" id="diff"></div>
-      </div>
-      <div class="panel">
-        <h2>Regression + Security Tests</h2>
-        <div class="tests" id="tests"></div>
-      </div>
-      <div class="panel">
-        <h2>Compliance Verdict</h2>
-        <div id="compliance"></div>
-      </div>
+      <div class="panel"><h2>Vulnerability</h2><div class="kv" id="vuln"></div><div class="diff" id="diff"></div></div>
+      <div class="panel"><h2>Regression + Security Tests</h2><div class="tests" id="tests"></div></div>
+      <div class="panel"><h2>Compliance Verdict</h2><div id="compliance"></div></div>
       <div class="seal">
         <h2 style="margin:0 0 8px;font-size:13px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted)">🔒 Tamper-Evident Audit Manifest</h2>
         <div style="font-size:12px;color:var(--muted)">SHA-256 over the canonicalized Band transcript</div>
-        <div class="hash" id="hash"></div>
-        <div style="font-size:12px;color:var(--muted)">Sealed at <span id="sealedAt" class="mono"></span></div>
+        <div class="hash" id="hash">—</div>
         <div class="gate">
           <div>Human approval: <span class="status pending" id="approvalStatus">PENDING</span></div>
-          <button id="approveBtn">✔ Approve &amp; Deploy</button>
+          <button id="approveBtn" class="approve" disabled>✔ Approve &amp; Deploy</button>
         </div>
       </div>
     </div>
   </div>
 
-  <footer>Powered by <b>Band.ai</b> · 4 agents · 2 frameworks (CrewAI + LangGraph) · no custom infra — Band is the bus, dashboard &amp; approval gate.</footer>
+  <footer>Powered by <b>Band.ai</b> · 4 agents · 2 frameworks (CrewAI + LangGraph) · the human makes the final call.</footer>
 </div>
 
 <script>
-/* Embedded fallback so the page renders even from file:// ; overridden by transcript.json when served. */
-const FALLBACK = {"track":"Track 3 — Regulated & High-Stakes Workflows","vulnerability":{"cwe":"CWE-89","owasp":"A03:2021 Injection","file":"target_repo/app.py","line":39,"payload":"x' OR '1'='1","snippet":"query = f\"SELECT ... WHERE name = '{name}'\""},"patch":{"before":"query = f\"SELECT ... WHERE name = '{name}'\"\ncur = conn.execute(query)","after":"cur = conn.execute(\n    \"SELECT ... WHERE name = ?\", (name,)\n)"},"tests":{"before":{"passed":2,"failed":1},"after":{"passed":3,"failed":0}},"compliance":{"decision":"PASS","controls":[{"id":"OWASP A03:2021","met":true},{"id":"SOC2 CC6.1","met":true},{"id":"SOC2 CC7.1","met":true},{"id":"SOC2 CC7.2","met":true}],"criteria":[{"k":"Root-cause class eliminated","met":true},{"k":"Full regression suite passes","met":true},{"k":"Exploit no longer reproduces","met":true},{"k":"No new secrets / network / PII","met":true}]},"integrity":{"algorithm":"SHA-256","digest":"9f2c1a7e4b86d3c05e1f0a9b8c7d6e5f4a3b2c1d0e9f8a7b6c5d4e3f2a1b0c9d","sealed_at_utc":"2026-06-19T18:05:00Z"},"messages":[{"sender":"Human (CI alert)","role":"human","framework":"","mentions":["@Hacker"],"content":"Security alert from CI: possible SQL injection in the acme-billing customer lookup. Investigate, confirm the exploit, and coordinate a verified fix."},{"sender":"Hacker","role":"hacker","framework":"CrewAI","mentions":["@Engineer"],"content":"Confirmed SQL injection (CWE-89 / OWASP A03) in app.py:39 — f-string concatenates `name` into SQL. Payload x' OR '1'='1 returns every row incl. admins. Fix: parameterized query. @Engineer over to you."},{"sender":"Engineer","role":"engineer","framework":"LangGraph","mentions":["@QA Tester"],"content":"Patched app.py:39 to conn.execute(\"... WHERE name = ?\", (name,)). Root cause eliminated. @QA Tester run the suite."},{"sender":"QA Tester","role":"qa","framework":"LangGraph","mentions":["@Compliance"],"content":"pytest: before 1 failed/2 passed → after 3 passed/0 failed. Injection boundary test now blocks the payload. @Compliance ready to seal."},{"sender":"Compliance Auditor","role":"compliance","framework":"CrewAI","mentions":["@Human"],"content":"PASS — OWASP A03 + SOC2 CC6.1/CC7.1/CC7.2. All acceptance criteria met. SHA-256 manifest sealed. @Human approval required before deploy."}]};
-
-const AGENTS = [
-  {emoji:"🕵️", name:"Hacker", fw:"CrewAI", crew:true, role:"Threat analyst — scans repo, pinpoints exploit (CWE+OWASP)"},
-  {emoji:"🔧", name:"Engineer", fw:"LangGraph", crew:false, role:"Patch developer — writes & applies root-cause fix"},
-  {emoji:"🧪", name:"QA Tester", fw:"LangGraph", crew:false, role:"Regression specialist — runs real pytest suite"},
-  {emoji:"📋", name:"Compliance", fw:"CrewAI", crew:true, role:"Risk assessor — SOC2/OWASP gate, routes to human"},
+const AGENTS=[
+  {key:"hacker",emoji:"🕵️",name:"Hacker",fw:"CrewAI",crew:true,role:"Threat analyst — scans repo, pinpoints exploit"},
+  {key:"engineer",emoji:"🔧",name:"Engineer",fw:"LangGraph",crew:false,role:"Patch developer — writes & applies root-cause fix"},
+  {key:"qa",emoji:"🧪",name:"QA Tester",fw:"LangGraph",crew:false,role:"Regression specialist — runs real pytest suite"},
+  {key:"compliance",emoji:"📋",name:"Compliance",fw:"CrewAI",crew:true,role:"Risk assessor — SOC2/OWASP gate to human"},
 ];
-const EMOJI = {human:"🙋",hacker:"🕵️",engineer:"🔧",qa:"🧪",compliance:"📋"};
+const EMOJI={human:"🙋",hacker:"🕵️",engineer:"🔧",qa:"🧪",compliance:"📋"};
+let MODE="replay", POLL=null;
 
-function render(d){
-  document.getElementById("trackBadge").textContent = (d.track||"Track 3").split("—")[0].trim();
-  // agents
-  document.getElementById("agents").innerHTML = AGENTS.map(a=>`
-    <div class="agent"><span class="dot"></span><div class="emoji">${a.emoji}</div>
-      <div class="name">${a.name}</div>
-      <div class="fw ${a.crew?'crew':''}">${a.fw}</div>
-      <div class="role">${a.role}</div></div>`).join("");
-  // feed
-  document.getElementById("feed").innerHTML = d.messages.map(m=>`
-    <div class="msg"><div class="av">${EMOJI[m.role]||"💬"}</div>
-      <div><div class="top"><span class="who">${m.sender}</span>
-        ${m.framework?`<span class="tag ${m.role==='hacker'||m.role==='compliance'?'crew':''}">${m.framework}</span>`:`<span class="tag human">human</span>`}
-        ${(m.mentions||[]).length?`<span class="ment">→ ${m.mentions.join(", ")}</span>`:""}</div>
-        <div class="body">${m.content}</div></div></div>`).join("");
-  // vuln
-  const v=d.vulnerability;
-  document.getElementById("vuln").innerHTML = `
-    <div><span class="chip red">${v.cwe}</span> <span class="chip red">${v.owasp}</span></div>
-    <div style="margin-top:8px"><b>Location:</b> <code>${v.file}:${v.line}</code></div>
-    <div><b>Exploit payload:</b> <code>${v.payload}</code></div>`;
-  document.getElementById("diff").innerHTML =
-    `<div class="del">- ${d.patch.before.replace(/\n/g,"\n- ")}</div>`+
-    `<div class="add">+ ${d.patch.after.replace(/\n/g,"\n+ ")}</div>`;
-  // tests
-  const t=d.tests;
-  document.getElementById("tests").innerHTML =
-    `<div class="pill fail">🔴 ${t.before.failed} failed · ${t.before.passed} passed</div>
-     <div class="arrow">→</div>
-     <div class="pill pass">🟢 ${t.after.passed} passed · ${t.after.failed} failed</div>`;
-  // compliance
-  const c=d.compliance;
-  document.getElementById("compliance").innerHTML =
-    `<div style="margin-bottom:10px"><span class="chip" style="color:var(--accent);border-color:#1f3d29;background:#0f1b13;font-weight:700">VERDICT: ${c.decision}</span></div>`+
-    c.controls.map(x=>`<div class="ctrl"><span class="ok">✓</span><div><b>${x.id}</b>${x.note?` <span class="n">— ${x.note}</span>`:""}</div></div>`).join("")+
-    `<div style="height:8px"></div>`+
-    c.criteria.map(x=>`<div class="ctrl"><span class="ok">${x.met?'✓':'✗'}</span><div class="n">${x.k}</div></div>`).join("");
-  // seal
-  document.getElementById("hash").textContent = (d.integrity.algorithm||"SHA-256")+":  "+d.integrity.digest;
-  document.getElementById("sealedAt").textContent = d.integrity.sealed_at_utc||"";
+function agentCards(rolesPosted, phase){
+  document.getElementById("agents").innerHTML=AGENTS.map(a=>{
+    const done=rolesPosted.has(a.key);
+    const active=!done && phase && phase.toLowerCase().includes(a.name.toLowerCase());
+    return `<div class="agent ${done?'done':''} ${active?'active':''}"><span class="dot"></span>
+      <div class="emoji">${a.emoji}</div><div class="name">${a.name}</div>
+      <div class="fw ${a.crew?'crew':''}">${a.fw}</div><div class="role">${a.role}</div></div>`;
+  }).join("");
 }
 
-document.getElementById("approveBtn").addEventListener("click",()=>{
-  const s=document.getElementById("approvalStatus");
-  s.textContent="APPROVED — deployed to production"; s.className="status approved";
-  const b=document.getElementById("approveBtn"); b.disabled=true; b.textContent="✔ Approved";
+function render(d){
+  document.getElementById("trackBadge").textContent=(d.track||"Track 3").split("—")[0].trim();
+  if(d.phase) document.getElementById("phase").innerHTML =
+    (MODE==="live" && !d.approved && d.phase!=="idle" ? '<span class="spinner"></span>' : '') + d.phase;
+  const msgs=d.messages||[];
+  const rolesPosted=new Set(msgs.map(m=>m.role).filter(r=>["hacker","engineer","qa","compliance"].includes(r)));
+  agentCards(rolesPosted, d.phase||"");
+
+  document.getElementById("feed").innerHTML = msgs.length ? msgs.map(m=>`
+    <div class="msg"><div class="av">${EMOJI[m.role]||"💬"}</div>
+      <div><div class="top"><span class="who">${m.sender}</span>
+        ${m.framework?`<span class="tag ${(m.role==='hacker'||m.role==='compliance')?'crew':''}">${m.framework}</span>`:`<span class="tag human">human</span>`}
+        ${(m.mentions||[]).length?`<span class="ment">→ ${m.mentions.join(", ")}</span>`:""}</div>
+        <div class="body">${m.content}</div></div></div>`).join("")
+    : `<div class="empty">${MODE==="live"?"Click <b>Launch Remediation Swarm</b> to begin.":"No activity."}</div>`;
+
+  const v=d.vulnerability||{};
+  document.getElementById("vuln").innerHTML = v.cwe ? `
+    <div><span class="chip red">${v.cwe}</span> <span class="chip red">${v.owasp||""}</span></div>
+    <div style="margin-top:8px"><b>Location:</b> <code>${v.file}:${v.line}</code></div>
+    <div><b>Exploit payload:</b> <code>${v.payload}</code></div>` : '<div class="empty">—</div>';
+  const p=d.patch||{};
+  document.getElementById("diff").innerHTML = p.before ?
+    `<div class="del">- ${(p.before).replace(/\n/g,"\n- ")}</div><div class="add">+ ${(p.after).replace(/\n/g,"\n+ ")}</div>` : "";
+
+  const t=d.tests, patched=d.patched;
+  if(t){
+    document.getElementById("tests").innerHTML = patched ?
+      `<div class="pill fail">🔴 ${t.before.failed} failed · ${t.before.passed} passed</div>
+       <div class="arrow">→</div><div class="pill pass">🟢 ${t.after.passed} passed · ${t.after.failed} failed</div>`
+     : `<div class="pill idle">⏳ awaiting patch — current: 🔴 ${t.before.failed} failed · ${t.before.passed} passed</div>`;
+  }
+
+  const c=d.compliance||{};
+  if(c.decision){
+    const pass=c.decision==="PASS";
+    document.getElementById("compliance").innerHTML =
+      `<div style="margin-bottom:10px"><span class="chip" style="${pass?'color:var(--accent);border-color:#1f3d29;background:#0f1b13':'color:var(--amber);border-color:#473d17;background:#1b1610'};font-weight:700">VERDICT: ${c.decision}</span></div>`+
+      (c.done?(c.controls||[]).map(x=>`<div class="ctrl"><span class="ok">✓</span><div><b>${x.id}</b>${x.note?` <span class="n">— ${x.note}</span>`:""}</div></div>`).join("")
+        +`<div style="height:8px"></div>`+(c.criteria||[]).map(x=>`<div class="ctrl"><span class="ok">${x.met?'✓':'✗'}</span><div class="n">${x.k}</div></div>`).join("")
+       :'<div class="empty">Compliance Auditor has not reported yet.</div>');
+  }
+
+  if(d.integrity) document.getElementById("hash").textContent=(d.integrity.algorithm||"SHA-256")+":  "+d.integrity.digest;
+
+  // approval gate
+  const s=document.getElementById("approvalStatus"), b=document.getElementById("approveBtn");
+  if(d.approved){ s.textContent="APPROVED — deployed to production"; s.className="status approved"; b.disabled=true; b.textContent="✔ Approved"; }
+  else { s.textContent="PENDING"; s.className="status pending"; b.disabled = !(c && c.done); }
+}
+
+async function refresh(){
+  try{ const r=await fetch("api/state"); const d=await r.json(); render(d);
+    if(d.approved && POLL){ clearInterval(POLL); POLL=null; }
+  }catch(e){}
+}
+
+document.getElementById("launchBtn").addEventListener("click", async ()=>{
+  const b=document.getElementById("launchBtn"); b.disabled=true; b.textContent="🚀 Launching…";
+  try{ await fetch("api/run",{method:"POST"});
+    document.getElementById("phase").innerHTML='<span class="spinner"></span>🕵️ Hacker analyzing the repository…';
+    if(POLL) clearInterval(POLL); POLL=setInterval(refresh, 2500); refresh();
+    b.style.display="none";
+  }catch(e){ b.disabled=false; b.textContent="🚀 Launch Remediation Swarm"; alert("Launch failed: "+e); }
 });
 
-fetch("transcript.json").then(r=>r.ok?r.json():Promise.reject()).then(render).catch(()=>render(FALLBACK));
+document.getElementById("approveBtn").addEventListener("click", async ()=>{
+  if(MODE==="live"){ await fetch("api/approve",{method:"POST"}); refresh(); }
+  else { const s=document.getElementById("approvalStatus"); s.textContent="APPROVED — deployed to production"; s.className="status approved";
+    const b=document.getElementById("approveBtn"); b.disabled=true; b.textContent="✔ Approved"; }
+});
+
+// boot: live if backend present, else static replay
+(async ()=>{
+  try{
+    const h=await fetch("api/health"); if(!h.ok) throw 0; const hh=await h.json(); if(!hh.live) throw 0;
+    MODE="live"; document.getElementById("modeBadge").textContent="● LIVE"; document.getElementById("modeBadge").className="badge live";
+    const room=document.getElementById("roomId");
+    document.getElementById("launchBtn").style.display="inline-block";
+    document.getElementById("phase").textContent="Ready — click Launch to start a remediation run.";
+    if(hh.room_id){ room.style.display="inline-block"; room.textContent="room "+hh.room_id.slice(0,8); document.getElementById("launchBtn").style.display="none"; POLL=setInterval(refresh,2500); refresh(); }
+  }catch(e){
+    MODE="replay"; document.getElementById("modeBadge").textContent="● REPLAY"; document.getElementById("modeBadge").className="badge replay";
+    document.getElementById("phase").textContent="Recorded run (static)";
+    try{ const r=await fetch("transcript.json"); render(await r.json()); }catch(_){}
+  }
+})();
 </script>
 </body>
 </html>

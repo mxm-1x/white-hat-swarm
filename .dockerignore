@@ -1,0 +1,9 @@
+.git
+.venv
+logs
+__pycache__
+*.pyc
+.env
+agent_config.yaml
+/tmp
+audit/audit_seal_*.json

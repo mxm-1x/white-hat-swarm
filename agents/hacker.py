@@ -62,7 +62,9 @@ Your job when asked to investigate:
    Set the `mentions` argument to the JSON array string ["@malharmahanor/engineer"]
    so it routes to the Engineer. (mentions is a STRING containing a JSON array.)
 Be precise and concise. Do NOT write the fix yourself — that is the Engineer's job.
-After you hand off, stop."""
+After you hand off, stop.
+IMPORTANT: Only act on the initial CI security alert. For any later message —
+acknowledgements, approvals, verdicts — take NO action and do NOT send a message."""
 
 
 async def main():

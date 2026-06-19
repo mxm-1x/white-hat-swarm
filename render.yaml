@@ -1,0 +1,42 @@
+# Render Blueprint — deploy the White-Hat Command Center.
+# In Render: New → Blueprint → connect this repo. Then set the `sync: false`
+# secrets (agent creds + OpenRouter key) in the dashboard before first deploy.
+services:
+  - type: web
+    name: white-hat-swarm
+    runtime: docker
+    # 4 agent processes (CrewAI + LangGraph) + the API need real RAM.
+    # 'standard' = 2 GB. 'starter'/'free' = 512 MB and will likely OOM.
+    plan: standard
+    healthCheckPath: /api/health
+    autoDeploy: true
+    envVars:
+      - key: LLM_PROVIDER
+        value: openrouter
+      - key: MODEL
+        value: openai/gpt-4o-mini
+      - key: BAND_REST_URL
+        value: https://app.band.ai
+      - key: BAND_WS_URL
+        value: wss://app.band.ai/api/v1/socket/websocket
+      - key: SPAWN_AGENTS
+        value: "1"
+      # --- secrets: set these in the Render dashboard (sync:false) ---
+      - key: OPENROUTER_API_KEY
+        sync: false
+      - key: HACKER_AGENT_ID
+        sync: false
+      - key: HACKER_API_KEY
+        sync: false
+      - key: ENGINEER_AGENT_ID
+        sync: false
+      - key: ENGINEER_API_KEY
+        sync: false
+      - key: QA_TESTER_AGENT_ID
+        sync: false
+      - key: QA_TESTER_API_KEY
+        sync: false
+      - key: COMPLIANCE_AGENT_ID
+        sync: false
+      - key: COMPLIANCE_API_KEY
+        sync: false

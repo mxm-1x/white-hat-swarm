@@ -1,3 +1,4 @@
+"""
 acme-billing — internal customer lookup service (DEMO TARGET).
 
 NOTE: This module ships with a deliberately planted vulnerability so the
@@ -6,7 +7,7 @@ White-Hat Remediation Swarm has something real to find, patch, and verify.
 Vulnerability: CWE-89 SQL Injection in `get_user_by_name`.
 The query is built with an f-string, so attacker-controlled `name` is
 concatenated directly into SQL.
-"
+"""
 
 import sqlite3
 
@@ -30,9 +31,13 @@ def init_db() -> sqlite3.Connection:
 
 
 def get_user_by_name(conn: sqlite3.Connection, name: str):
-    """Look up a single user by exact name."""
-    query = "SELECT id, name, email, is_admin FROM users WHERE name = ?"
-    cur = conn.execute(query, (name,))
+    """Look up a single user by exact name.
+
+    !!! VULNERABLE !!!  `name` is interpolated straight into the SQL string.
+    A value like  x' OR '1'='1   returns every row, including admins.
+    """
+    query = f"SELECT id, name, email, is_admin FROM users WHERE name = '{name}'"
+    cur = conn.execute(query)
     return cur.fetchall()
 
 

@@ -51,7 +51,10 @@ When the Hacker @mentions you with a threat brief:
    routes to the QA Tester.
 If the QA Tester later @mentions you with failing tests, read the logs, fix, and
 re-apply, then message QA again with mentions ["@malharmahanor/qa-tester"].
-Keep the public message short; put code in the patch."""
+Keep the public message short; put code in the patch.
+IMPORTANT: Only act on (a) a threat brief from the Hacker, or (b) failing tests
+from QA. For any other message — approvals, verdicts, acknowledgements, or a
+patch that already passed — take NO action and do NOT send a message."""
 
 
 async def main():

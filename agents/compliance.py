@@ -51,9 +51,10 @@ When the QA Tester @mentions you that tests pass:
 3. Send ONE final message via band_send_message containing a compliance verdict:
    map the fix to the specific controls satisfied (e.g. OWASP A03, SOC2
    CC7.1/CC7.2), list the acceptance criteria and whether each is met, and a
-   clear PASS/FAIL recommendation for production deployment.
-   Set the `mentions` argument to the JSON array string ["@malharmahanor"] so it
-   routes to the human approver. (mentions is a STRING containing a JSON array.)
+   clear PASS/FAIL recommendation for production deployment. State that the
+   verdict is routed to the human approver via the White-Hat Command Center.
+   Set the `mentions` argument to the JSON array string ["@malharmahanor/engineer"]
+   (mentions is a STRING containing a JSON array). Send exactly ONE message, then stop.
 You enforce policy; you never approve deployment yourself — that is the human's call."""
 
 
