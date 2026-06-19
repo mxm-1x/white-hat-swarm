@@ -4,6 +4,9 @@ Checks the patch against internal SOC2 / OWASP policy (RAG-lite over
 security_policy.md), then posts a final compliance verdict that @mentions the
 human approver. The cryptographic seal of the full Band transcript is produced
 by audit/seal_audit.py (run against the room afterward).
+
+Tool names are derived from input model class names: PolicyInput -> "policy",
+ReadFileInput -> "readfile".
 """
 
 import asyncio
@@ -12,7 +15,7 @@ import logging
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
-from band import Agent
+from band import Agent, AdapterFeatures
 from band.adapters import CrewAIAdapter
 from band.config import load_agent_config
 
@@ -22,31 +25,35 @@ from llm import crewai_model
 logging.basicConfig(level=logging.INFO)
 
 
-class Empty(BaseModel):
-    pass
+class PolicyInput(BaseModel):
+    section: str = Field("all", description="Policy section to read; use 'all'.")
 
 
-class ReadInput(BaseModel):
+class ReadFileInput(BaseModel):
     filename: str = Field(..., description="Source file name, e.g. app.py")
 
 
-def read_policy(_: Empty) -> str:
+def policy(inp: PolicyInput) -> str:
     return T.read_policy()
 
 
-def read_source(inp: ReadInput) -> str:
+def readfile(inp: ReadFileInput) -> str:
     return T.read_source(inp.filename)
 
 
 CUSTOM = """You are THE COMPLIANCE AUDITOR, the high-stakes policy gatekeeper in a
-remediation swarm. When the QA Tester @mentions you that tests pass:
-1. Call read_policy to load the SOC2 / OWASP acceptance criteria.
-2. Call read_source on the patched file to confirm the fix matches policy
+remediation swarm. Your tools: `policy` (load SOC2/OWASP acceptance criteria),
+`readfile` (read a source file).
+When the QA Tester @mentions you that tests pass:
+1. Call `policy` to load the acceptance criteria.
+2. Call `readfile` on the patched file to confirm the fix matches policy
    (parameterized query, no new secrets / network calls / PII handling).
-3. Post ONE final message that @mentions the human approver containing a
-   compliance verdict: map the fix to the specific controls satisfied
-   (e.g. OWASP A03, SOC2 CC7.1/CC7.2), list the acceptance criteria and whether
-   each is met, and a clear PASS/FAIL recommendation for production deployment.
+3. Send ONE final message via band_send_message containing a compliance verdict:
+   map the fix to the specific controls satisfied (e.g. OWASP A03, SOC2
+   CC7.1/CC7.2), list the acceptance criteria and whether each is met, and a
+   clear PASS/FAIL recommendation for production deployment.
+   Set the `mentions` argument to the JSON array string ["@malharmahanor"] so it
+   routes to the human approver. (mentions is a STRING containing a JSON array.)
 You enforce policy; you never approve deployment yourself — that is the human's call."""
 
 
@@ -60,9 +67,10 @@ async def main():
         backstory="A meticulous GRC auditor who has shepherded dozens of SOC2 audits and trusts only evidence.",
         custom_section=CUSTOM,
         verbose=True,
+        features=AdapterFeatures(include_tools=["band_send_message"]),
         additional_tools=[
-            (Empty, read_policy),
-            (ReadInput, read_source),
+            (PolicyInput, policy),
+            (ReadFileInput, readfile),
         ],
     )
     agent = Agent.create(adapter=adapter, agent_id=agent_id, api_key=api_key)

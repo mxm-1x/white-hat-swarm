@@ -40,7 +40,14 @@ def load_key(agent_key: str) -> str:
 
 
 def get(path: str, api_key: str):
-    req = urllib.request.Request(f"{BASE}{path}", headers={"X-API-Key": api_key})
+    req = urllib.request.Request(
+        f"{BASE}{path}",
+        headers={
+            "X-API-Key": api_key,
+            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36",
+            "Accept": "application/json",
+        },
+    )
     try:
         with urllib.request.urlopen(req, timeout=30) as r:
             return json.loads(r.read().decode())

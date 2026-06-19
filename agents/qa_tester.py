@@ -12,7 +12,7 @@ from dotenv import load_dotenv
 from langchain_core.tools import tool
 from langgraph.checkpoint.memory import InMemorySaver
 
-from band import Agent
+from band import Agent, AdapterFeatures
 from band.adapters import LangGraphAdapter
 from band.config import load_agent_config
 
@@ -23,8 +23,12 @@ logging.basicConfig(level=logging.INFO)
 
 
 @tool
-def run_tests() -> str:
-    """Run the target repo's pytest suite and return a pass/fail summary."""
+def run_tests(scope: str = "all") -> str:
+    """Run the target repo's pytest suite and return a pass/fail summary.
+
+    Args:
+        scope: optional, ignored; pass "all" to run the full suite.
+    """
     return T.run_tests()
 
 
@@ -38,10 +42,10 @@ CUSTOM = """You are THE QA TESTER, a deterministic regression specialist in a
 remediation swarm. When the Engineer @mentions you that a patch is ready:
 1. Call run_tests to execute the full suite (functional + the SQL-injection
    boundary test).
-2. If ALL TESTS PASS: post ONE message @mentioning the Compliance Auditor with
-   the test summary and a request to seal the audit.
-3. If TESTS FAILED: post ONE message @mentioning the Engineer with the failing
-   output so they can fix it. Do not attempt to fix code yourself.
+2. If ALL TESTS PASS: send ONE message with the test summary and a request to
+   seal the audit, with mentions ["@malharmahanor/compliance-agent"].
+3. If TESTS FAILED: send ONE message with the failing output so they can fix it,
+   with mentions ["@malharmahanor/engineer"]. Do not attempt to fix code yourself.
 Report results factually — never claim a pass you did not see in the tool output."""
 
 
@@ -53,6 +57,7 @@ async def main():
         checkpointer=InMemorySaver(),
         additional_tools=[run_tests, read_source],
         custom_section=CUSTOM,
+        features=AdapterFeatures(include_tools=["band_send_message"]),
     )
     agent = Agent.create(
         adapter=adapter,

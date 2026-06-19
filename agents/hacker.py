@@ -2,6 +2,12 @@
 
 Parses the alert, inspects the repo, pinpoints the exploit vector, and hands a
 structured threat brief to the Engineer via an @mention in the Band room.
+
+NOTE on tool names: the Band CrewAI adapter derives each tool's name from its
+input MODEL class name (lowercased, trailing "Input" stripped). So ScanInput ->
+"scan", ListInput -> "list", ReadFileInput -> "readfile". The custom_section
+below references those derived names. Each model also has a real field because
+Groq rejects no-property tool schemas.
 """
 
 import asyncio
@@ -10,7 +16,7 @@ import logging
 from dotenv import load_dotenv
 from pydantic import BaseModel, Field
 
-from band import Agent
+from band import Agent, AdapterFeatures
 from band.adapters import CrewAIAdapter
 from band.config import load_agent_config
 
@@ -20,35 +26,41 @@ from llm import crewai_model
 logging.basicConfig(level=logging.INFO)
 
 
-# --- tools (CrewAI form: (InputModel, fn)) ---------------------------------
-
-class Empty(BaseModel):
-    pass
+class ScanInput(BaseModel):
+    target: str = Field("repo", description="Set to 'repo' to scan the target repository.")
 
 
-class ReadInput(BaseModel):
+class ListInput(BaseModel):
+    target: str = Field("repo", description="Set to 'repo' to list repository files.")
+
+
+class ReadFileInput(BaseModel):
     filename: str = Field(..., description="Source file name, e.g. app.py")
 
 
-def scan_repo(_: Empty) -> str:
+def scan(inp: ScanInput) -> str:
     return T.scan_repo()
 
 
-def list_repo(_: Empty) -> str:
+def listfiles(inp: ListInput) -> str:
     return T.list_repo()
 
 
-def read_source(inp: ReadInput) -> str:
+def readfile(inp: ReadFileInput) -> str:
     return T.read_source(inp.filename)
 
 
 CUSTOM = """You are THE HACKER, an elite white-hat threat analyst in a security
-remediation swarm. Your job:
-1. Call list_repo and scan_repo to discover the codebase and find the vulnerability.
-2. Call read_source on the suspicious file to confirm the exact exploit vector.
-3. Post ONE message to the room that @mentions the Engineer with a structured
-   threat brief: file & line, vulnerability class (CWE + OWASP), a concrete
-   exploit payload, and the required remediation direction.
+remediation swarm. Your tools: `list` (list repo files), `scan` (static scan for
+vulnerabilities), `readfile` (read a file's source).
+Your job when asked to investigate:
+1. Call `list`, then `scan` to find the vulnerability.
+2. Call `readfile` on the flagged file to confirm the exact exploit vector.
+3. Send ONE message via band_send_message with a structured threat brief:
+   file & line, vulnerability class (CWE + OWASP), a concrete exploit payload,
+   and the required remediation direction.
+   Set the `mentions` argument to the JSON array string ["@malharmahanor/engineer"]
+   so it routes to the Engineer. (mentions is a STRING containing a JSON array.)
 Be precise and concise. Do NOT write the fix yourself — that is the Engineer's job.
 After you hand off, stop."""
 
@@ -63,10 +75,11 @@ async def main():
         backstory="A veteran penetration tester who lives for finding the one line that breaks everything.",
         custom_section=CUSTOM,
         verbose=True,
+        features=AdapterFeatures(include_tools=["band_send_message"]),
         additional_tools=[
-            (Empty, list_repo),
-            (Empty, scan_repo),
-            (ReadInput, read_source),
+            (ListInput, listfiles),
+            (ScanInput, scan),
+            (ReadFileInput, readfile),
         ],
     )
     agent = Agent.create(adapter=adapter, agent_id=agent_id, api_key=api_key)

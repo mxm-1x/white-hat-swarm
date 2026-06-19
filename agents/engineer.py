@@ -13,7 +13,7 @@ from dotenv import load_dotenv
 from langchain_core.tools import tool
 from langgraph.checkpoint.memory import InMemorySaver
 
-from band import Agent
+from band import Agent, AdapterFeatures
 from band.adapters import LangGraphAdapter
 from band.config import load_agent_config
 
@@ -46,10 +46,12 @@ When the Hacker @mentions you with a threat brief:
 2. Fix the ROOT CAUSE (e.g. replace string-built SQL with a parameterized query
    using '?' placeholders and a params tuple). Do not merely filter input.
 3. Call apply_patch with the COMPLETE corrected file contents.
-4. Post ONE message that @mentions the QA Tester, summarizing the change and
-   asking them to run the test suite.
+4. Post ONE message via band_send_message summarizing the change and asking them
+   to run the test suite. Set mentions to ["@malharmahanor/qa-tester"] so it
+   routes to the QA Tester.
 If the QA Tester later @mentions you with failing tests, read the logs, fix, and
-re-apply, then mention QA again. Keep the public message short; put code in the patch."""
+re-apply, then message QA again with mentions ["@malharmahanor/qa-tester"].
+Keep the public message short; put code in the patch."""
 
 
 async def main():
@@ -60,6 +62,7 @@ async def main():
         checkpointer=InMemorySaver(),
         additional_tools=[read_source, apply_patch],
         custom_section=CUSTOM,
+        features=AdapterFeatures(include_tools=["band_send_message"]),
     )
     agent = Agent.create(
         adapter=adapter,
