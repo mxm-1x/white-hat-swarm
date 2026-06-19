@@ -2,6 +2,12 @@
 
 **Track 3 — Regulated & High-Stakes Workflows · built on [Band.ai](https://band.ai)**
 
+### 🔗 Live demo dashboard: https://mxm-1x.github.io/white-hat-swarm/
+
+A static "Remediation Command Center" that replays the swarm's run — the four agents, the
+Band hand-off chain, the 🔴→🟢 test flip, the SOC2/OWASP verdict, and the SHA-256-sealed
+manifest with a working human-approval gate.
+
 Four AI agents — built in **two different frameworks** — collaborate inside a
 single Band room to take a security vulnerability from **detection → verified
 patch → compliance sign-off**, then hand a **tamper-evident audit manifest** to a
